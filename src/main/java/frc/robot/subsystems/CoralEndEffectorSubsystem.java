@@ -17,6 +17,7 @@ import frc.robot.subsystems.ElevatorSubsystem.ElevatorHeights;
 
 public class CoralEndEffectorSubsystem implements Subsystem{
     private double SuckOutput = 0.3;
+    private double SpitOutput = -0.3;
 
     TalonFXS coralEndEffectorRollers;
     TalonFXS coralEndEffectorWrist;
@@ -60,7 +61,13 @@ public class CoralEndEffectorSubsystem implements Subsystem{
     public Command suckCommand() {
         return run(()->{
             manualDriveCoralEndEffectorRollers(SuckOutput);
-        })
+        });
+    }
+
+    public Command spitCommand() {
+        return run(()->{
+            manualDriveCoralEndEffectorRollers(SpitOutput);
+        });
     }
 
 }
