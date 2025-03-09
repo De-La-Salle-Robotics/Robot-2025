@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public class ElevatorSubsystem implements Subsystem {
-    TalonFX elevatorLeft;
+    TalonFX elevatorLeft = new TalonFX(1, "canivore");
     TalonFX elevatorRight;
 
     DutyCycleOut manualControlRequest = new DutyCycleOut(0);
@@ -32,6 +32,7 @@ public class ElevatorSubsystem implements Subsystem {
 
     public enum ElevatorHeights{
         Stowed(Rotations.of(0)),
+        ReadyToCollect(Rotations.of(10)),
         L1(Rotations.of(20)),
         L2(Rotations.of(40)),
         L3(Rotations.of(60)),
