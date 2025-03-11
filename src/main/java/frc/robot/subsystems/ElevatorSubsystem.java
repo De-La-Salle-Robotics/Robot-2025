@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public class ElevatorSubsystem implements Subsystem {
     TalonFX elevatorLeft = new TalonFX(1, "canivore");
-    TalonFX elevatorRight;
+    TalonFX elevatorRight = new TalonFX(2, "canivore");
 
     DutyCycleOut manualControlRequest = new DutyCycleOut(0);
     MotionMagicVoltage automaticHeightRequest = new MotionMagicVoltage(0);

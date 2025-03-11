@@ -23,6 +23,7 @@ import frc.robot.subsystems.CoralEndEffectorSubsystem;
 import frc.robot.subsystems.CoralIndexerSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.CoralEndEffectorSubsystem.WristAngles;
+import frc.robot.subsystems.CoralIndexerSubsystem.CoralGroundIntakeAngles;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorHeights;
 
 public class RobotContainer {
@@ -66,13 +67,21 @@ public class RobotContainer {
         driverJoystick.x().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L3).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3)));
         driverJoystick.b().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L2).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3)));
         driverJoystick.a().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L1).alongWith(endEffector.goToAngleCommand(()->WristAngles.L1)));
+        driverJoystick.leftBumper().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Ground));
+        driverJoystick.leftTrigger().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Stowed));
+        driverJoystick.rightBumper().onTrue(endEffector.suckCommand());
+        driverJoystick.rightTrigger().onTrue(endEffector.spitCommand());
 
-        operatorJoystick.a().onTrue(indexer.openCoralFlippers());
-        operatorJoystick.b().onTrue(indexer.closeCoralFlippers());
-        operatorJoystick.y().onTrue(indexer.manualZeroFlippers());
+
+        operatorJoystick.rightBumper().onTrue(indexer.openCoralFlippers());
+        operatorJoystick.rightTrigger().onTrue(indexer.closeCoralFlippers());
+        operatorJoystick.start().onTrue(indexer.manualZeroFlippers());
+        operatorJoystick.b().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.ReadyToCollect));
+        operatorJoystick.x().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.ReadyToGrab));
+        operatorJoystick.a().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.Stowed).alongWith(endEffector.suckCommand()));
 
         // reset the field-centric heading on left bumper press
-        driverJoystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        operatorJoystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
