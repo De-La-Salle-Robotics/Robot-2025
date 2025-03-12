@@ -10,8 +10,11 @@ import java.security.GuardedObject;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -46,8 +49,14 @@ public class RobotContainer {
     public final CoralIndexerSubsystem indexer = new CoralIndexerSubsystem();
     public final ElevatorSubsystem elevator = new ElevatorSubsystem();
     public final CoralEndEffectorSubsystem endEffector = new CoralEndEffectorSubsystem();
+    
+    /* Path follower */
+    private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
+        autoChooser = AutoBuilder.buildAutoChooser("Tests");
+        SmartDashboard.putData("Auto Mode", autoChooser);
+        
         configureBindings();
     }
 
@@ -69,8 +78,8 @@ public class RobotContainer {
         driverJoystick.a().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L1).alongWith(endEffector.goToAngleCommand(()->WristAngles.L1)));
         driverJoystick.leftBumper().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Ground));
         driverJoystick.leftTrigger().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Stowed));
-        driverJoystick.rightBumper().onTrue(endEffector.suckCommand());
-        driverJoystick.rightTrigger().onTrue(endEffector.spitCommand());
+        driverJoystick.rightBumper().whileTrue(endEffector.suckCommand());
+        driverJoystick.rightTrigger().whileTrue(endEffector.spitCommand());
 
 
         operatorJoystick.rightBumper().onTrue(indexer.openCoralFlippers());
@@ -78,7 +87,7 @@ public class RobotContainer {
         operatorJoystick.start().onTrue(indexer.manualZeroFlippers());
         operatorJoystick.b().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.ReadyToCollect));
         operatorJoystick.x().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.ReadyToGrab));
-        operatorJoystick.a().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.Stowed).alongWith(endEffector.suckCommand()));
+        operatorJoystick.a().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.Stowed).alongWith(endEffector.suckUntilHaveCoralCommand()));
 
         // reset the field-centric heading on left bumper press
         operatorJoystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -87,6 +96,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        /* Run the path selected from the auto chooser */
+        return autoChooser.getSelected();
     }
 }

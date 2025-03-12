@@ -10,14 +10,18 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFXS;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.utils.Trigger;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorHeights;
 
 public class CoralEndEffectorSubsystem implements Subsystem{
     private double SuckOutput = 0.3;
     private double SpitOutput = -0.3;
+    private double StopOutput = 0;
+    private double EndEffectorRollersStopVelocity = 0.1;
 
     TalonFXS coralEndEffectorRollers;
     TalonFXS coralEndEffectorWrist;
@@ -68,6 +72,13 @@ public class CoralEndEffectorSubsystem implements Subsystem{
         return run(()->{
             manualDriveCoralEndEffectorRollers(SpitOutput);
         });
+    }
+
+    public Command suckUntilHaveCoralCommand() {
+        return run(()->manualDriveCoralEndEffectorRollers(SuckOutput)).until(new Trigger(()->{
+            return coralEndEffectorRollers.getVelocity().getValueAsDouble()<EndEffectorRollersStopVelocity;
+        }).debounce(1, DebounceType.kRising).asRisingEdge()).andThen(
+        run(()->manualDriveCoralEndEffectorRollers(StopOutput))); 
     }
 
 }
