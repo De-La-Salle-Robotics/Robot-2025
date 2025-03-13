@@ -19,13 +19,12 @@ public class ClimbSubsystem implements Subsystem {
     private double peckOutput = 0.3;
     private double climbOutput = -0.3;
 
-    TalonFX climb;
+    TalonFX climb = new TalonFX(Constants.ClimbConstants.ClimbId, Constants.CANivoreName);
     DCMotorSim climbSim;
 
     DutyCycleOut manualControlRequest = new DutyCycleOut(0);
 
     public ClimbSubsystem() {
-        climb = new TalonFX(Constants.ClimbConstants.ClimbId, Constants.CANivoreName);
         if(RobotBase.isSimulation()) {
             DCMotor motors = DCMotor.getKrakenX60(1);
             climbSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(motors, 0.1, 400), motors);

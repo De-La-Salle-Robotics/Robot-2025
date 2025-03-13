@@ -14,7 +14,6 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -29,8 +28,8 @@ public class CoralIndexerSubsystem implements Subsystem{
     private double SlowCloseFlippersOutput = -0.1;
     private double FlippersStopVelocity = -0.01;
 
-    TalonFX coralGroundIntake;
-    TalonFX coralFlippers;
+    TalonFX coralGroundIntake = new TalonFX(Constants.CoralIndexerConstants.GroundIntakeId, Constants.CANivoreName);
+    TalonFX coralFlippers = new TalonFX(Constants.CoralIndexerConstants.FlipperId, Constants.CANivoreName);
 
     DCMotorSim groundIntakeSim;
     DCMotorSim flipperSim;
@@ -39,14 +38,11 @@ public class CoralIndexerSubsystem implements Subsystem{
     MotionMagicVoltage automaticAngleRequest = new MotionMagicVoltage(0);
 
     public CoralIndexerSubsystem() {
-        coralGroundIntake = new TalonFX(Constants.CoralIndexerConstants.GroundIntakeId, Constants.CANivoreName);
-        coralFlippers = new TalonFX(Constants.CoralIndexerConstants.FlipperId, Constants.CANivoreName);
-
         if(RobotBase.isSimulation()) {
             DCMotor intakeMotor = DCMotor.getKrakenX60(1);
             DCMotor flipperMotor = DCMotor.getKrakenX60(1);
 
-            groundIntakeSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(intakeMotor, 0.1, 96), intakeMotor);
+            groundIntakeSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(intakeMotor, 0.1, 72), intakeMotor);
             flipperSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(flipperMotor, 0.1, 1), flipperMotor);
         }
     }

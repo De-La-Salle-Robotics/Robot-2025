@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Rotations;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -29,8 +28,8 @@ public class CoralEndEffectorSubsystem implements Subsystem{
     private double StopOutput = 0;
     private double EndEffectorRollersStopVelocity = 0.1;
 
-    TalonFX coralEndEffectorRollers;
-    TalonFX coralEndEffectorWrist;
+    TalonFX coralEndEffectorRollers = new TalonFX(CoralEndEffectorConstants.RollerId);
+    TalonFX coralEndEffectorWrist = new TalonFX(Constants.CoralEndEffectorConstants.WristId, Constants.CANivoreName);
 
     DCMotorSim rollerSim;
     DCMotorSim wristSim;
@@ -39,9 +38,6 @@ public class CoralEndEffectorSubsystem implements Subsystem{
     MotionMagicVoltage automaticAngleRequest = new MotionMagicVoltage(0);
 
     public CoralEndEffectorSubsystem() {
-        coralEndEffectorRollers = new TalonFX(CoralEndEffectorConstants.RollerId);
-        coralEndEffectorWrist = new TalonFX(Constants.CoralEndEffectorConstants.WristId, Constants.CANivoreName);
-
         if(RobotBase.isSimulation()) {
             DCMotor rollerMotors = DCMotor.getKrakenX60(1);
             DCMotor wristMotors = DCMotor.getKrakenX60(1);
