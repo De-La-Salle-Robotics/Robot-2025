@@ -13,7 +13,7 @@ public class ClimbSubsystem implements Subsystem {
     private double peckOutput = 0.3;
     private double climbOutput = -0.3;
 
-    TalonFX climb;
+    TalonFX climb = new TalonFX(13, "canivore");
 
     DutyCycleOut manualControlRequest = new DutyCycleOut(0);
 

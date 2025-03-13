@@ -7,9 +7,11 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.traits.CommonTalon;
 
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -25,8 +27,8 @@ public class CoralIndexerSubsystem implements Subsystem{
     private double SlowCloseFlippersOutput = -0.1;
     private double FlippersStopVelocity = -0.01;
 
-    CommonTalon coralGroundIntake;
-    CommonTalon coralFlippers;
+    TalonFX coralGroundIntake = new TalonFX(11, "canivore");
+    TalonFX coralFlippers = new TalonFX(12, "canivore");
 
     DutyCycleOut manualControlRequest = new DutyCycleOut(0);
     MotionMagicVoltage automaticAngleRequest = new MotionMagicVoltage(0);
@@ -41,6 +43,11 @@ public class CoralIndexerSubsystem implements Subsystem{
         private CoralGroundIntakeAngles(Angle degree) {
             this.Degree = degree;
         }
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Coral stator current", coralFlippers.getStatorCurrent().getValueAsDouble());
     }
 
     private void goToAngle(CoralGroundIntakeAngles angleToGoTo){

@@ -8,9 +8,12 @@ import static edu.wpi.first.units.Units.*;
 
 import java.security.GuardedObject;
 
+import javax.print.attribute.standard.MediaSize.NA;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -56,11 +59,24 @@ public class RobotContainer {
     public RobotContainer() {
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
-        
+
         configureBindings();
     }
 
     private void configureBindings() {
+
+        NamedCommands.registerCommand("ZeroFlippers",(indexer.manualZeroFlippers()));
+        NamedCommands.registerCommand("GoToL4",(elevator.goToHeightCommand(()->ElevatorHeights.L4).alongWith(endEffector.goToAngleCommand(()->WristAngles.L4))));
+        NamedCommands.registerCommand("GoToL3",(elevator.goToHeightCommand(()->ElevatorHeights.L3).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3))));
+        NamedCommands.registerCommand("GoToL2",(elevator.goToHeightCommand(()->ElevatorHeights.L2).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3))));
+        NamedCommands.registerCommand("GoToL1",(elevator.goToHeightCommand(()->ElevatorHeights.L1).alongWith(endEffector.goToAngleCommand(()->WristAngles.L1))));
+        NamedCommands.registerCommand("Spit",(endEffector.spitCommand()));
+        NamedCommands.registerCommand("closeFlippers", indexer.closeCoralFlippers());
+        NamedCommands.registerCommand("OpenFlippers", indexer.openCoralFlippers());
+        NamedCommands.registerCommand("SuckUntilHaveCoral",(elevator.goToHeightCommand(()->ElevatorHeights.Stowed).alongWith(endEffector.suckUntilHaveCoralCommand())));
+        NamedCommands.registerCommand("ReadyToCollect", (elevator.goToHeightCommand(()->ElevatorHeights.ReadyToCollect)));
+        NamedCommands.registerCommand("GroundIntakeUp", (indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Stowed)));
+
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
@@ -76,6 +92,9 @@ public class RobotContainer {
         driverJoystick.x().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L3).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3)));
         driverJoystick.b().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L2).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3)));
         driverJoystick.a().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L1).alongWith(endEffector.goToAngleCommand(()->WristAngles.L1)));
+        
+        indexer.setDefaultCommand(indexer.run(()->{}));
+        
         driverJoystick.leftBumper().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Ground));
         driverJoystick.leftTrigger().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Stowed));
         driverJoystick.rightBumper().whileTrue(endEffector.suckCommand());

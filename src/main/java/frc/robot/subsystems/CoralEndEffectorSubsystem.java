@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -23,8 +24,8 @@ public class CoralEndEffectorSubsystem implements Subsystem{
     private double StopOutput = 0;
     private double EndEffectorRollersStopVelocity = 0.1;
 
-    TalonFXS coralEndEffectorRollers;
-    TalonFXS coralEndEffectorWrist;
+    TalonFX coralEndEffectorRollers = new TalonFX(13, "canivore");
+    TalonFX coralEndEffectorWrist = new TalonFX(14, "canivore");
 
     DutyCycleOut manualControlRequest = new DutyCycleOut(0);
     MotionMagicVoltage automaticAngleRequest = new MotionMagicVoltage(0);
