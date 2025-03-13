@@ -2,11 +2,8 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
-import edu.wpi.first.units.PerUnit;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.DistanceUnit;
-import edu.wpi.first.units.Measure;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -18,15 +15,24 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Constants;
 
 public class ElevatorSubsystem implements Subsystem {
-    TalonFX elevatorLeft = new TalonFX(1, "canivore");
-    TalonFX elevatorRight = new TalonFX(2, "canivore");
+    TalonFX elevatorLeft;
+    TalonFX elevatorRight;
+
+    DCMotorSim leftSim;
+    DCMotorSim rightSim;
 
     DutyCycleOut manualControlRequest = new DutyCycleOut(0);
     MotionMagicVoltage automaticHeightRequest = new MotionMagicVoltage(0);
 
     public ElevatorSubsystem(){
+        elevatorLeft = new TalonFX(Constants.ElevatorConstants.LeftId, Constants.CANivoreName);
+        elevatorLeft = new TalonFX(Constants.ElevatorConstants.RightId, Constants.CANivoreName);
+
+        
+
         elevatorRight.setControl(new Follower(elevatorLeft.getDeviceID(), false));
     }
 

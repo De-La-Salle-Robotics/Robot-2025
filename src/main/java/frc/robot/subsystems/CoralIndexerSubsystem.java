@@ -2,19 +2,22 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
 
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.hardware.traits.CommonTalon;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.CoralEndEffectorSubsystem.WristAngles;
+import frc.robot.Constants;
 
 public class CoralIndexerSubsystem implements Subsystem{
     private double FlippersZeroAngle = 0;
@@ -25,11 +28,45 @@ public class CoralIndexerSubsystem implements Subsystem{
     private double SlowCloseFlippersOutput = -0.1;
     private double FlippersStopVelocity = -0.01;
 
-    CommonTalon coralGroundIntake;
-    CommonTalon coralFlippers;
+    TalonFX coralGroundIntake;
+    TalonFX coralFlippers;
+
+    DCMotorSim groundIntakeSim;
+    DCMotorSim flipperSim;
 
     DutyCycleOut manualControlRequest = new DutyCycleOut(0);
     MotionMagicVoltage automaticAngleRequest = new MotionMagicVoltage(0);
+
+    public CoralIndexerSubsystem() {
+        coralGroundIntake = new TalonFX(Constants.CoralIndexerConstants.GroundIntakeId, Constants.CANivoreName);
+        coralFlippers = new TalonFX(Constants.CoralIndexerConstants.FlipperId, Constants.CANivoreName);
+
+        if(RobotBase.isSimulation()) {
+            DCMotor intakeMotor = DCMotor.getKrakenX60(1);
+            DCMotor flipperMotor = DCMotor.getKrakenX60(1);
+
+            groundIntakeSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(intakeMotor, 0.1, 96), intakeMotor);
+            flipperSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(flipperMotor, 0.1, 1), flipperMotor);
+        }
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        TalonFXSimState groundIntakeSimState = coralGroundIntake.getSimState();
+        TalonFXSimState flipperSimState = coralFlippers.getSimState();
+
+        groundIntakeSim.setInputVoltage(groundIntakeSimState.getMotorVoltage());
+        flipperSim.setInput(flipperSimState.getMotorVoltage());
+
+        groundIntakeSim.update(0.02);
+        flipperSim.update(0.02);
+
+        groundIntakeSimState.setRawRotorPosition(groundIntakeSim.getAngularPosition());
+        groundIntakeSimState.setRotorVelocity(groundIntakeSim.getAngularVelocity());
+        
+        flipperSimState.setRawRotorPosition(flipperSim.getAngularPosition());
+        flipperSimState.setRotorVelocity(flipperSim.getAngularVelocity());
+    }
 
     public enum CoralGroundIntakeAngles{
         Stowed(Degrees.of(0)),
