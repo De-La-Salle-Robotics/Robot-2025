@@ -31,7 +31,7 @@ public class ElevatorSubsystem implements Subsystem {
         elevatorLeft = new TalonFX(Constants.ElevatorConstants.LeftId, Constants.CANivoreName);
         elevatorLeft = new TalonFX(Constants.ElevatorConstants.RightId, Constants.CANivoreName);
 
-        
+
 
         elevatorRight.setControl(new Follower(elevatorLeft.getDeviceID(), false));
     }
