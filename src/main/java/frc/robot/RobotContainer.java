@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralEndEffectorSubsystem;
 import frc.robot.subsystems.CoralIndexerSubsystem;
@@ -43,6 +44,7 @@ public class RobotContainer {
     public final CoralIndexerSubsystem indexer = new CoralIndexerSubsystem();
     public final ElevatorSubsystem elevator = new ElevatorSubsystem();
     public final CoralEndEffectorSubsystem endEffector = new CoralEndEffectorSubsystem();
+    public final ClimbSubsystem climb = new ClimbSubsystem();
     
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
@@ -78,13 +80,16 @@ public class RobotContainer {
                     .withRotationalRate(-driverJoystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
+        
+        indexer.setDefaultCommand(indexer.run(()->{}));
+        elevator.setDefaultCommand(elevator.run(()->{}));
+        endEffector.setDefaultCommand(endEffector.run(()->{}));
+        climb.setDefaultCommand(climb.run(()->{}));
 
         driverJoystick.y().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L4).alongWith(endEffector.goToAngleCommand(()->WristAngles.L4)));
         driverJoystick.x().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L3).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3)));
         driverJoystick.b().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L2).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3)));
         driverJoystick.a().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L1).alongWith(endEffector.goToAngleCommand(()->WristAngles.L1)));
-        
-        indexer.setDefaultCommand(indexer.run(()->{}));
         
         driverJoystick.leftBumper().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Ground));
         driverJoystick.leftTrigger().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Stowed));

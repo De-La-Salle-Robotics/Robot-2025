@@ -39,10 +39,10 @@ public class ElevatorSubsystem implements Subsystem {
 
     DoublePublisher leftHeightPublisher = Constants.ElevatorConstants.ElevatorTable.getDoubleTopic("Left Height").publish();
     DoublePublisher rigthHeightPublisher = Constants.ElevatorConstants.ElevatorTable.getDoubleTopic("Right Height").publish();
-    DoublePublisher leftOutputPublisher = Constants.ElevatorConstants.ElevatorTable.getDoubleTopic("Left Height").publish();
-    DoublePublisher rightOutputPublisher = Constants.ElevatorConstants.ElevatorTable.getDoubleTopic("Right Height").publish();
+    DoublePublisher leftOutputPublisher = Constants.ElevatorConstants.ElevatorTable.getDoubleTopic("Left Output").publish();
+    DoublePublisher rightOutputPublisher = Constants.ElevatorConstants.ElevatorTable.getDoubleTopic("Right Output").publish();
 
-    public ElevatorSubsystem(){
+    public ElevatorSubsystem() {
         if (RobotBase.isSimulation()) {
             DCMotor elevatorMotor = DCMotor.getKrakenX60(2);
 
@@ -54,13 +54,16 @@ public class ElevatorSubsystem implements Subsystem {
     @Override
     public void simulationPeriodic() {
         TalonFXSimState elevatorSimState = elevatorLeft.getSimState();
+        TalonFXSimState followSimState = elevatorRight.getSimState();
 
-        elevatorSim.setInputVoltage(elevatorSimState.getMotorVoltage());
+        elevatorSim.setInputVoltage((elevatorSimState.getMotorVoltage() + followSimState.getMotorVoltage()) / 2);
 
         elevatorSim.update(0.02);
 
         elevatorSimState.setRawRotorPosition(elevatorSim.getAngularPosition());
         elevatorSimState.setRotorVelocity(elevatorSim.getAngularVelocity());
+        followSimState.setRawRotorPosition(elevatorSim.getAngularPosition());
+        followSimState.setRotorVelocity(elevatorSim.getAngularVelocity());
     }
 
     @Override
