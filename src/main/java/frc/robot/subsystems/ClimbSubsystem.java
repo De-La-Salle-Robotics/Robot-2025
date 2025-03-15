@@ -5,6 +5,7 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -25,6 +26,7 @@ public class ClimbSubsystem implements Subsystem {
     private double stopClimbOut = 0.5;
 
     TalonFX climb = new TalonFX(Constants.ClimbConstants.ClimbId, Constants.CANivoreName);
+    CANrange detector = new CANrange(5, Constants.CANivoreName);
     DCMotorSim climbSim;
 
     Servo climbStop = new Servo(Constants.ClimbConstants.ServoClimbStop);
