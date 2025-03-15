@@ -13,10 +13,13 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,6 +27,10 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
 
 public class ElevatorSubsystem implements Subsystem {
+
+    private double elevatorUpOutput = 0.3;
+    private double elevatordownOutput = -0.3;
+
     TalonFX elevatorLeft = new TalonFX(Constants.ElevatorConstants.LeftId, Constants.CANivoreName);
     TalonFX elevatorRight = new TalonFX(Constants.ElevatorConstants.RightId, Constants.CANivoreName);
 
@@ -48,6 +55,13 @@ public class ElevatorSubsystem implements Subsystem {
 
             elevatorSim = new DCMotorSim(LinearSystemId.createElevatorSystem(elevatorMotor, 10, 0.3, 10), elevatorMotor);
         }
+
+        elevatorLeft.getConfigurator().apply(
+            new TalonFXConfiguration().withMotorOutput(
+                new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)));
+        elevatorRight.getConfigurator().apply(
+            new TalonFXConfiguration().withMotorOutput(
+                new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)));
 
         elevatorRight.setControl(new Follower(elevatorLeft.getDeviceID(), false));
     }
@@ -107,6 +121,18 @@ public class ElevatorSubsystem implements Subsystem {
     public Command goToHeightCommand(Supplier<ElevatorHeights> elevatorHeightProvider) {
         return run(()-> {goToHeight(elevatorHeightProvider.get());
             
+        });
+    }
+
+    public Command elevatorUpCommand() {
+        return run(()->{
+            manualDriveTalons(elevatorUpOutput);
+        });
+    }
+
+    public Command elevatorDownCommand() {
+        return run(()->{
+            manualDriveTalons(elevatordownOutput);
         });
     }
 }

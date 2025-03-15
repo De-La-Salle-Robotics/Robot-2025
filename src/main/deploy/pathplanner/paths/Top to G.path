@@ -8,42 +8,30 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.916929095090808,
-        "y": 6.48195393241415
+        "x": 6.677151639351124,
+        "y": 4.426588114753845
       },
-      "isLocked": true,
+      "isLocked": false,
       "linkedName": "Top of Start Line"
     },
     {
       "anchor": {
         "x": 5.83,
-        "y": 4.183
+        "y": 3.86
       },
       "prevControl": {
-        "x": 6.231510188859519,
-        "y": 4.329199184294482
+        "x": 6.101741803285551,
+        "y": 4.258760245901386
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "At H"
+      "linkedName": "At G"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 1.0,
-      "rotationDegrees": 180.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "GoToL4",
-      "waypointRelativePos": 0.8327543424317481,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

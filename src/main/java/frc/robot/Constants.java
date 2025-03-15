@@ -10,6 +10,7 @@ public class Constants {
 
     public class ClimbConstants {
         public static final int ClimbId = 10;
+        public static final int ServoClimbStop = 0;
 
         public static final NetworkTable ClimbTable = inst.getTable("Climb");
     }

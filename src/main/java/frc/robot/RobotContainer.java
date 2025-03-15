@@ -11,9 +11,13 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.robot.generated.TunerConstants;
@@ -25,6 +29,7 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.CoralEndEffectorSubsystem.WristAngles;
 import frc.robot.subsystems.CoralIndexerSubsystem.CoralGroundIntakeAngles;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorHeights;
+import frc.utils.Trigger;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -84,7 +89,7 @@ public class RobotContainer {
         indexer.setDefaultCommand(indexer.run(()->{}));
         elevator.setDefaultCommand(elevator.run(()->{}));
         endEffector.setDefaultCommand(endEffector.run(()->{}));
-        climb.setDefaultCommand(climb.run(()->{}));
+        climb.setDefaultCommand(climb.neutralOutputCommand());
 
         driverJoystick.y().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L4).alongWith(endEffector.goToAngleCommand(()->WristAngles.L4)));
         driverJoystick.x().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L3).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3)));
@@ -96,16 +101,24 @@ public class RobotContainer {
         driverJoystick.rightBumper().whileTrue(endEffector.suckCommand());
         driverJoystick.rightTrigger().whileTrue(endEffector.spitCommand());
 
-
         operatorJoystick.rightBumper().onTrue(indexer.openCoralFlippers());
         operatorJoystick.rightTrigger().onTrue(indexer.closeCoralFlippers());
         operatorJoystick.start().onTrue(indexer.manualZeroFlippers());
         operatorJoystick.b().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.ReadyToCollect));
         operatorJoystick.x().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.ReadyToGrab));
         operatorJoystick.a().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.Stowed).alongWith(endEffector.suckUntilHaveCoralCommand()));
+        operatorJoystick.leftTrigger().whileTrue(elevator.elevatorDownCommand());
+        operatorJoystick.leftBumper().whileTrue(elevator.elevatorUpCommand());
+        operatorJoystick.povUp().whileTrue(climb.peckCommand());
+        operatorJoystick.povDown().whileTrue(climb.climbCommand());
+        operatorJoystick.povRight().whileTrue(climb.stopClimbCommand());
+
 
         // reset the field-centric heading on left bumper press
-        operatorJoystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        driverJoystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+        new Trigger(DriverStation::isDisabled).debounce(5).onTrue(new InstantCommand(()->climb.setCoastMode()).ignoringDisable(true));
+        new Trigger(DriverStation::isEnabled).onTrue(new InstantCommand(climb::setBrakeMode).alongWith(new InstantCommand(climb::initStopServo)));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
