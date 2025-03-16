@@ -23,11 +23,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.CoralEndEffectorSubsystem;
+import frc.robot.subsystems.CoralRollerSubsystem;
+import frc.robot.subsystems.CoralWristSubsystem;
 import frc.robot.subsystems.CoralIndexerSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.CoralEndEffectorSubsystem.WristAngles;
 import frc.robot.subsystems.CoralIndexerSubsystem.CoralGroundIntakeAngles;
+import frc.robot.subsystems.CoralWristSubsystem.WristAngles;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorHeights;
 import frc.utils.Trigger;
 
@@ -48,32 +49,34 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final CoralIndexerSubsystem indexer = new CoralIndexerSubsystem();
     public final ElevatorSubsystem elevator = new ElevatorSubsystem();
-    public final CoralEndEffectorSubsystem endEffector = new CoralEndEffectorSubsystem();
+    public final CoralRollerSubsystem endEffector = new CoralRollerSubsystem();
+    public final CoralWristSubsystem wrist = new CoralWristSubsystem();
     public final ClimbSubsystem climb = new ClimbSubsystem();
     
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
+        configureBindings();
+
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
-
-        configureBindings();
     }
 
     private void configureBindings() {
 
         NamedCommands.registerCommand("ZeroFlippers",(indexer.manualZeroFlippers()));
-        NamedCommands.registerCommand("GoToL4",(elevator.goToHeightCommand(()->ElevatorHeights.L4).alongWith(endEffector.goToAngleCommand(()->WristAngles.L4))));
-        NamedCommands.registerCommand("GoToL3",(elevator.goToHeightCommand(()->ElevatorHeights.L3).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3))));
-        NamedCommands.registerCommand("GoToL2",(elevator.goToHeightCommand(()->ElevatorHeights.L2).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3))));
-        NamedCommands.registerCommand("GoToL1",(elevator.goToHeightCommand(()->ElevatorHeights.L1).alongWith(endEffector.goToAngleCommand(()->WristAngles.L1))));
+        NamedCommands.registerCommand("GoToL4",(elevator.goToHeightCommand(()->ElevatorHeights.L4).alongWith(wrist.goToAngleCommand(()->WristAngles.L4))));
+        NamedCommands.registerCommand("GoToL3",(elevator.goToHeightCommand(()->ElevatorHeights.L3).alongWith(wrist.goToAngleCommand(()->WristAngles.L2OrL3))));
+        NamedCommands.registerCommand("GoToL2",(elevator.goToHeightCommand(()->ElevatorHeights.L2).alongWith(wrist.goToAngleCommand(()->WristAngles.L2OrL3))));
+        NamedCommands.registerCommand("GoToL1",(wrist.goToAngleCommand(()->WristAngles.L1)));
         NamedCommands.registerCommand("Spit",(endEffector.spitCommand()));
         NamedCommands.registerCommand("closeFlippers", indexer.closeCoralFlippers());
         NamedCommands.registerCommand("OpenFlippers", indexer.openCoralFlippers());
         NamedCommands.registerCommand("SuckUntilHaveCoral",(elevator.goToHeightCommand(()->ElevatorHeights.Stowed).alongWith(endEffector.suckUntilHaveCoralCommand())));
         NamedCommands.registerCommand("ReadyToCollect", (elevator.goToHeightCommand(()->ElevatorHeights.ReadyToCollect)));
         NamedCommands.registerCommand("GroundIntakeUp", (indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Stowed)));
+        NamedCommands.registerCommand("ZeroWristInPlace", wrist.zeroWristInPlaceCommand());
 
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
@@ -88,13 +91,14 @@ public class RobotContainer {
         
         indexer.setDefaultCommand(indexer.run(()->{}));
         elevator.setDefaultCommand(elevator.run(()->{}));
-        endEffector.setDefaultCommand(endEffector.run(()->{}));
+        endEffector.setDefaultCommand(endEffector.manualCoralEndEffectorCommand(()->0));
+        wrist.setDefaultCommand(wrist.manualWrist(()->-operatorJoystick.getLeftY() * 0.1));
         climb.setDefaultCommand(climb.neutralOutputCommand());
 
-        driverJoystick.y().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L4).alongWith(endEffector.goToAngleCommand(()->WristAngles.L4)));
-        driverJoystick.x().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L3).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3)));
-        driverJoystick.b().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L2).alongWith(endEffector.goToAngleCommand(()->WristAngles.L2OrL3)));
-        driverJoystick.a().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L1).alongWith(endEffector.goToAngleCommand(()->WristAngles.L1)));
+        driverJoystick.y().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L4).alongWith(wrist.goToAngleCommand(()->WristAngles.L4)));
+        driverJoystick.x().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L3).alongWith(wrist.goToAngleCommand(()->WristAngles.L2OrL3)));
+        driverJoystick.b().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L2).alongWith(wrist.goToAngleCommand(()->WristAngles.L2OrL3)));
+        driverJoystick.a().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.L1).alongWith(wrist.goToAngleCommand(()->WristAngles.L1)).until(()->Math.abs(operatorJoystick.getLeftY()) > 0.2));
         
         driverJoystick.leftBumper().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Ground));
         driverJoystick.leftTrigger().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.Stowed));
@@ -107,6 +111,7 @@ public class RobotContainer {
         operatorJoystick.b().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.ReadyToCollect));
         operatorJoystick.x().onTrue(indexer.goToAngleCommand(()->CoralGroundIntakeAngles.ReadyToGrab));
         operatorJoystick.a().onTrue(elevator.goToHeightCommand(()->ElevatorHeights.Stowed).alongWith(endEffector.suckUntilHaveCoralCommand()));
+        operatorJoystick.y().onTrue(wrist.zeroWristInPlaceCommand());
         operatorJoystick.leftTrigger().whileTrue(elevator.elevatorDownCommand());
         operatorJoystick.leftBumper().whileTrue(elevator.elevatorUpCommand());
         operatorJoystick.povUp().whileTrue(climb.peckCommand());
@@ -117,8 +122,8 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         driverJoystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        new Trigger(DriverStation::isDisabled).debounce(5).onTrue(new InstantCommand(()->climb.setCoastMode()).ignoringDisable(true));
-        new Trigger(DriverStation::isEnabled).onTrue(new InstantCommand(climb::setBrakeMode).alongWith(new InstantCommand(climb::initStopServo)));
+        // new Trigger(DriverStation::isDisabled).debounce(5).onTrue(new InstantCommand(()->climb.setCoastMode()).ignoringDisable(true));
+        // new Trigger(DriverStation::isEnabled).onTrue(new InstantCommand(climb::setBrakeMode).alongWith(new InstantCommand(climb::initStopServo)));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

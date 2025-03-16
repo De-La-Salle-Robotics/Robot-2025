@@ -119,8 +119,8 @@ public class ElevatorSubsystem implements Subsystem {
     }
 
     public Command goToHeightCommand(Supplier<ElevatorHeights> elevatorHeightProvider) {
-        return run(()-> {goToHeight(elevatorHeightProvider.get());
-            
+        return run(()-> {
+            goToHeight(elevatorHeightProvider.get());
         });
     }
 
