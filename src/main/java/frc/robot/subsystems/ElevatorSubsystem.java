@@ -28,8 +28,9 @@ import frc.robot.Constants;
 
 public class ElevatorSubsystem implements Subsystem {
 
-    private double elevatorUpOutput = 0.3;
-    private double elevatordownOutput = -0.3;
+    private double elevatorUpOutput = 0.1;
+    private double elevatordownOutput = -0.1;
+    private double elevatorStopOutput = 0.0;
 
     TalonFX elevatorLeft = new TalonFX(Constants.ElevatorConstants.LeftId, Constants.CANivoreName);
     TalonFX elevatorRight = new TalonFX(Constants.ElevatorConstants.RightId, Constants.CANivoreName);
@@ -133,6 +134,12 @@ public class ElevatorSubsystem implements Subsystem {
     public Command elevatorDownCommand() {
         return run(()->{
             manualDriveTalons(elevatordownOutput);
+        });
+    }
+
+    public Command elevatorStopCommand() {
+        return run(()->{
+            manualDriveTalons(elevatorStopOutput);
         });
     }
 }

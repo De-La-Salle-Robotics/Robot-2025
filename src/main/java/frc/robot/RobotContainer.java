@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.robot.generated.TunerConstants;
@@ -67,6 +68,9 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("ZeroFlippers",(indexer.manualZeroFlippers()));
         NamedCommands.registerCommand("GoToL4",(elevator.goToHeightCommand(()->ElevatorHeights.L4).alongWith(wrist.goToAngleCommand(()->WristAngles.L4))));
+        NamedCommands.registerCommand("ReadyCoral", indexer.closeCoralFlippers().alongWith(wrist.goToAngleCommand(()->WristAngles.Collect))
+            .andThen(new WaitCommand(0.8))
+                .andThen(endEffector.suckUntilHaveCoralCommand()).alongWith(elevator.goToHeightCommand(()->ElevatorHeights.Stowed)));
         NamedCommands.registerCommand("GoToL3",(elevator.goToHeightCommand(()->ElevatorHeights.L3).alongWith(wrist.goToAngleCommand(()->WristAngles.L2OrL3))));
         NamedCommands.registerCommand("GoToL2",(elevator.goToHeightCommand(()->ElevatorHeights.L2).alongWith(wrist.goToAngleCommand(()->WristAngles.L2OrL3))));
         NamedCommands.registerCommand("GoToL1",(wrist.goToAngleCommand(()->WristAngles.L1)));
@@ -89,8 +93,9 @@ public class RobotContainer {
             )
         );
         
+        elevator.setDefaultCommand(elevator.elevatorStopCommand());
         indexer.setDefaultCommand(indexer.run(()->{}));
-        elevator.setDefaultCommand(elevator.run(()->{}));
+        //elevator.setDefaultCommand(elevator.run(()->{}));
         endEffector.setDefaultCommand(endEffector.manualCoralEndEffectorCommand(()->0));
         wrist.setDefaultCommand(wrist.manualWrist(()->-operatorJoystick.getLeftY() * 0.1));
         climb.setDefaultCommand(climb.neutralOutputCommand());

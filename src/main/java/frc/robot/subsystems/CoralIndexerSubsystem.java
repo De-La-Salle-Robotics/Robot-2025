@@ -21,11 +21,11 @@ import frc.robot.Constants;
 
 public class CoralIndexerSubsystem implements Subsystem{
     private double FlippersZeroAngle = 0;
-    private double FlippersOpenAngle = 45;
-    private double FlippersClosedAngle = 0;
+    private double FlippersOpenAngle = 0;
+    private double FlippersClosedAngle = 5;
     private double OpenFlippersOutput = 0.5;
     private double CloseFlippersOutput = -0.5;
-    private double SlowCloseFlippersOutput = -0.1;
+    private double SlowCloseFlippersOutput = -0.01;
     private double FlippersStopVelocity = -0.01;
 
     TalonFX coralGroundIntake = new TalonFX(Constants.CoralIndexerConstants.GroundIntakeId, Constants.CANivoreName);
