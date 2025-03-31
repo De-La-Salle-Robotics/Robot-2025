@@ -6,12 +6,14 @@ import static edu.wpi.first.units.Units.Rotation;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -44,6 +46,8 @@ public class CoralWristSubsystem implements Subsystem{
         coralEndEffectorWrist.getConfigurator().apply(
             new TalonFXConfiguration().withSlot0(
                 new Slot0Configs().withKP(3)
+            ).withMotorOutput(
+                new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake)
             )
         );
     }
@@ -62,9 +66,10 @@ public class CoralWristSubsystem implements Subsystem{
 
     public enum WristAngles{
         Collect(Rotation.of(0)),
-        L1(Rotation.of(4)),
-        L2OrL3(Rotation.of(3)),
-        L4(Rotation.of(3)),
+        L1(Rotation.of(5)),
+        L2(Rotation.of(4.3)),
+        L3(Rotation.of(5.5)),
+        L4(Rotation.of(2)),
         ;
 
         final Angle Degree;

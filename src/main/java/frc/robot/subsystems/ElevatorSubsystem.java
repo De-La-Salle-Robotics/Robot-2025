@@ -13,23 +13,27 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 
 public class ElevatorSubsystem implements Subsystem {
 
-    private double elevatorUpOutput = 0.1;
-    private double elevatordownOutput = -0.1;
+    private double elevatorUpOutput = 0.3;
+    private double elevatordownOutput = -0.3;
     private double elevatorStopOutput = 0.0;
 
     TalonFX elevatorLeft = new TalonFX(Constants.ElevatorConstants.LeftId, Constants.CANivoreName);
@@ -59,12 +63,17 @@ public class ElevatorSubsystem implements Subsystem {
 
         elevatorLeft.getConfigurator().apply(
             new TalonFXConfiguration().withMotorOutput(
-                new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)));
+                new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
+                                        .withNeutralMode(NeutralModeValue.Brake))
+                                    .withSlot0(new Slot0Configs().withKP(10))
+                                    .withMotionMagic(new MotionMagicConfigs().withMotionMagicCruiseVelocity(60)
+                                                                            .withMotionMagicAcceleration(300)));
         elevatorRight.getConfigurator().apply(
             new TalonFXConfiguration().withMotorOutput(
-                new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)));
+                new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive)
+                                        .withNeutralMode(NeutralModeValue.Brake)));
 
-        elevatorRight.setControl(new Follower(elevatorLeft.getDeviceID(), false));
+        elevatorRight.setControl(new Follower(elevatorLeft.getDeviceID(), true));
     }
     @Override
     public void simulationPeriodic() {
@@ -93,10 +102,10 @@ public class ElevatorSubsystem implements Subsystem {
     public enum ElevatorHeights{
         Stowed(Rotations.of(0)),
         ReadyToCollect(Rotations.of(10)),
-        L1(Rotations.of(20)),
-        L2(Rotations.of(40)),
-        L3(Rotations.of(60)),
-        L4(Rotations.of(80)),
+        L1(Rotations.of(12)),
+        L2(Rotations.of(22)),
+        L3(Rotations.of(33.6)),
+        L4(Rotations.of(20)),
         ;
 
         final Angle Height;
@@ -107,6 +116,10 @@ public class ElevatorSubsystem implements Subsystem {
 
     private void manualDriveTalons(double output) {
         elevatorLeft.setControl(manualControlRequest.withOutput(output));
+    }
+
+    public Trigger isNearSetpoint(ElevatorHeights target) {
+        return new Trigger(() -> (elevatorLeft.getPosition().getValue().minus(target.Height).abs(Rotations) < 1));
     }
 
     public Command manualElevatorCommand(DoubleSupplier elevatorInput) {
@@ -128,18 +141,22 @@ public class ElevatorSubsystem implements Subsystem {
     public Command elevatorUpCommand() {
         return run(()->{
             manualDriveTalons(elevatorUpOutput);
-        });
+        }).finallyDo(()->{manualDriveTalons(0);});
     }
 
     public Command elevatorDownCommand() {
         return run(()->{
             manualDriveTalons(elevatordownOutput);
-        });
+        }).finallyDo(()->{manualDriveTalons(0);});
     }
 
     public Command elevatorStopCommand() {
         return run(()->{
             manualDriveTalons(elevatorStopOutput);
         });
+    }
+
+    public Command zeroInPlaceCommand() {
+        return runOnce(()->elevatorLeft.setPosition(0));
     }
 }

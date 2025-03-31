@@ -98,6 +98,12 @@ public class CoralIndexerSubsystem implements Subsystem{
         .until(flippersOpenTrigger());
     }
 
+    public Command doNothingFlippers() {
+        return run(()-> {
+            manualDriveCoralFlippers(0);
+        });
+    }
+
     public Command closeCoralFlippers() {
         return run(()-> {
             manualDriveCoralFlippers(CloseFlippersOutput);

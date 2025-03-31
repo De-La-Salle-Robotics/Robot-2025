@@ -32,4 +32,11 @@ public class Constants {
         
         public static final NetworkTable ElevatorTable = inst.getTable("Elevator");
     }
+    public class AlgaeConstants {
+        public static final int algaeWristId = 17;
+        public static final int algaeGrabId = 18;
+
+        public static final NetworkTable AlgaeTable = inst.getTable("Algae");
+    }
+    
 }
